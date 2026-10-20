@@ -3,6 +3,14 @@ import joblib
 import numpy as np
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "model.pkl")
+_CACHED_MODEL = None
+
+def get_model():
+    """Singleton getter to cache model in memory instead of reloading from disk on each request."""
+    global _CACHED_MODEL
+    if _CACHED_MODEL is None:
+        _CACHED_MODEL = joblib.load(MODEL_PATH)
+    return _CACHED_MODEL
 
 def preprocessdata(Gender, Married, Education, Self_Employed, ApplicantIncome,
                    CoapplicantIncome, LoanAmount, Loan_Amount_Term, Credit_History,
@@ -23,6 +31,6 @@ def preprocessdata(Gender, Married, Education, Self_Employed, ApplicantIncome,
         float(Credit_History),
         float(Property_Area)
     ]]
-    trained_model = joblib.load(MODEL_PATH)
+    trained_model = get_model()
     prediction = trained_model.predict(test_data)
-    return prediction
+    return int(prediction[0]) if len(prediction) > 0 else 0
